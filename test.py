@@ -69,7 +69,7 @@ def request_api():
     mac = []
     status = []
     statusp = []
-    url = "http://10.109.178.6/st3server/v1/devices"
+    url = "http://localhost/st3server/v1/devices"
     response = requests.request("GET", url)
     json_obj = response.json()
     for item in json_obj["items"]:
@@ -86,7 +86,7 @@ def close_window():
 def delete_device():
     print("delete device", tree.focus())
     dev_name = tree.focus()
-    url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name)
+    url = "http://localhost/st3server/v1/devices/" + str(dev_name)
     print(url)
     requests.request("DELETE", url)
     show_discovered()
@@ -95,14 +95,14 @@ def delete_device():
 def device_provisioning():
     print("delete provisioning", tree.focus())
     dev_name = tree.focus()
-    url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name) + "/provision"
+    url = "http://localhost/st3server/v1/devices/" + str(dev_name) + "/provision"
     requests.request("PUT", url)
     print(url)
 
 
 def start_locking():
     dev_name = tree.focus()
-    url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name) + "/startLock"
+    url = "http://localhost/st3server/v1/devices/" + str(dev_name) + "/startLock"
     requests.request("PUT", url)
 
 
