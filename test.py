@@ -1,63 +1,74 @@
 from tkinter import *
 from tkinter.ttk import *
-import time
 import requests
 
 root = Tk()
-
-root.geometry("850x350")
+root.geometry("1000x400")
 root.title("Application")
 
-PanedWindow(orient=VERTICAL)
+tree = Treeview(root)
+tree["columns"] = ('Percent', 'Status', 'Start', 'End')
+
+tree.column("#0", width=200, minwidth=150, stretch=NO)
+tree.column("Percent", width=300, minwidth=80, stretch=NO)
+tree.column("Status", width=100, minwidth=80, stretch=NO)
+tree.column("Start", width=100, minwidth=80, stretch=NO)
+tree.column("End", width=100, minwidth=80, stretch=NO)
+
+tree.heading('#0', text='MAC')
+tree.heading('Status', text='Status', anchor=W)
+tree.heading('Percent', text='Percent')
+tree.heading('Start', text='Start Time')
+tree.heading('End', text='End Time')
+
+mac = []  # ['aaa', 'bbb', 'ccc', 'ddd', 'eee']
+statusp = []  # ['1', '2', '3', '4', '5']
+status = []  # ['a', 'b', 'c', 'd', 'e']
+start = []
+end = []
+progress = []
 
 
-def show_discovered(mac, status, statusp):
-    yy = 50
-    global flag
-    v = IntVar()
-    for i in range(len(mac)):
-        Radiobutton(root, text=mac[i], variable=v, value=i).place(x=200, y=yy)
-        Label(root, text=status[i]).place(x=350, y=yy)
-        Label(root, text=statusp[i]).place(x=400, y=yy)
+def update_item():
+    global mac
+    global status
+    global statusp
+    global start
+    request_api()
+    i = 0
+    for item in tree.get_children():
+        tree.item(item, values=(statusp[i], status[i], start[i]))
+        bar(i, statusp[i])
+
+        i = i + 1
+    root.after(1000, update_item)
+
+
+def show_discovered():
+    global mac
+    global status
+    global statusp
+    global start
+    request_api()
+    tree.delete(*tree.get_children())
+    yy = 70
+    for i in range(len(mac)):  # 'item%i' % i
+        progress.append(Progressbar(root, orient=HORIZONTAL, length=250, mode='determinate'))
+        progress[i].place(x=400, y=yy)
+        tree.insert('', 'end', mac[i], text=mac[i], values=(statusp[i], status[i], start[i]))
         yy = yy + 20
-        if statusp[i] != 100:
-            flag = True
-        else:
-            flag = False
 
-    if flag:
-        time.sleep(10)
-        request_api()
-
-
-
-
-# Function responsible for the updation
-# of the progress bar value
-# Progress bar widget
-progress = Progressbar(root, orient=HORIZONTAL, length=800, mode='determinate')
-
-
-def bar():
-    for i in range(0, 100, 2):
-        progress['value'] = i
-        root.update_idletasks()
-        time.sleep(0.1)
-    progress['value'] = 100
-
-
-progress.place(x=10, y=250)
-
-
-def close_window():
-    root.destroy()  # destroying the main window
+    update_item()
 
 
 def request_api():
+    global mac
+    global status
+    global statusp
+    global start
     mac = []
     status = []
     statusp = []
-
     url = "http://10.109.178.6/st3server/v1/devices"
     response = requests.request("GET", url)
     json_obj = response.json()
@@ -65,15 +76,48 @@ def request_api():
         mac.append(item["mac"])
         status.append(item["status"])
         statusp.append(item["statusPercentage"])
-    show_discovered(mac, status, statusp)
+        start.append(item["startTime"])
 
 
-Frame(root).place(x=200, y=200)
-Button(root, text='Device Discover', command=request_api).place(x=80, y=50)
-# Button(root, text='Stop Discover', command=stop_request_api).place(x=80, y=100)
-Button(root, text='Start Provisioning', command=bar).place(x=80, y=200)
-Button(root, text='Start Locking').place(x=400, y=200)
-Button(root, text='Delete Device').place(x=700, y=200)
-Button(root, text='Exit', command=close_window).place(x=700, y=300)
+def close_window():
+    root.destroy()  # destroying the main window
+
+
+def delete_device():
+    print("delete device", tree.focus())
+    dev_name = tree.focus()
+    url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name)
+    print(url)
+    requests.request("DELETE", url)
+    show_discovered()
+
+
+def device_provisioning():
+    print("delete provisioning", tree.focus())
+    dev_name = tree.focus()
+    url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name) + "/provision"
+    requests.request("PUT", url)
+    print(url)
+
+
+def start_locking():
+    dev_name = tree.focus()
+    url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name) + "/startLock"
+    requests.request("PUT", url)
+
+
+def bar(prog, val):
+    for i in range(0, 100, 2):
+        progress[prog]['value'] = val
+        root.update_idletasks()
+
+
+# MAIN UI PLACEMENTS
+tree.place(x=150, y=50)
+Button(root, text='Device Discover', command=show_discovered).place(x=50, y=100)
+Button(root, text='Start Provisioning', command=device_provisioning).place(x=200, y=300)
+Button(root, text='Start Locking', command=start_locking).place(x=500, y=300)
+Button(root, text='Delete Device', command=delete_device).place(x=800, y=300)
+Button(root, text='Exit', command=close_window).place(x=800, y=350)
 
 mainloop()
