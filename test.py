@@ -7,6 +7,11 @@ root = Tk()
 root.geometry("1100x400")
 root.title("Application")
 
+
+label = Label(root)
+label.place(x=150, y=275)#grid(row=150, column=275)#(x=150, y=275)
+label.configure(text = " Welcome! ")
+
 tree = Treeview(root)
 tree["columns"] = ('Percent', 'Status', 'Start', 'End')
 
@@ -33,12 +38,12 @@ res_code = 0
 
 def update_item():
     global mac, status, statusp, start, end
+    label.configure(text='Showing Discovered Devices')
     request_api()
     i = 0
     for item in tree.get_children():
         tree.item(item, values=(statusp[i], status[i], start[i], end[i]))
         bar(i, statusp[i])
-
         i = i + 1
     root.after(1000, update_item)
 
@@ -49,10 +54,10 @@ def show_discovered():
     if (len(progress)) > 0:
         for i in range(len(progress)):
             progress[i].destroy()
+    label.configure(text='Discovering Device')
     progress = []
     request_api()
     tree.delete(*tree.get_children())
-    print("Discovering Device")
     yy = 70
     for i in range(len(mac)):
         progress.append(Progressbar(root, orient=HORIZONTAL, length=250, mode='determinate'))
@@ -64,19 +69,17 @@ def show_discovered():
 
 def request_api():
     global mac, res_code, status, statusp, start, end
-
     mac = []
     status = []
     statusp = []
     start = []
     end = []
-
     url = "http://10.109.178.6/st3server/v1/devices"
     try:
         response = requests.request("GET", url)
         res_code = response.status_code
     except:
-        print("Connection Error")
+        label.configure(text="Connection Error")
         res_code = 0
 
     if res_code == 200:
@@ -99,6 +102,8 @@ def request_api():
 
 
 def close_window():
+    label.configure(text="Closing Window")
+    time.sleep(1)
     root.destroy()
 
 
@@ -108,11 +113,13 @@ def delete_device():
         url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name)
         try:
             requests.request("DELETE", url)
+            label.configure(text="Deleting Selected Device")
+            time.sleep(1)
             show_discovered()
         except:
-            print("Connection Error")
+            label.configure(text="Connection Error")
     else:
-        print("No Device Selected")
+        label.configure(text="No Device Selected")
 
 
 def device_provisioning():
@@ -121,10 +128,11 @@ def device_provisioning():
         url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name) + "/provision"
         try:
             requests.request("PUT", url)
+            label.configure(text="Provisioning Selected Device")
         except:
-            print("Connection Error")
+            label.configure(text="Connection Error")
     else:
-        print("No Device Selected")
+        label.configure(text="No Device Selected")
 
 
 def start_locking():
@@ -133,10 +141,11 @@ def start_locking():
         url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name) + "/startLock"
         try:
             requests.request("PUT", url)
+            label.configure(text="Locking Selected Device")
         except:
-            print("Connection Error")
+            label.configure(text="Connection Error")
     else:
-        print("No Device Selected")
+        label.configure(text="No Device Selected")
 
 
 def bar(prog, val):
