@@ -9,7 +9,7 @@ root.title("Application")
 
 
 label = Label(root)
-label.place(x=150, y=275)#grid(row=150, column=275)#(x=150, y=275)
+label.place(x=150, y=275)
 label.configure(text = " Welcome! ")
 
 tree = Treeview(root)
@@ -39,6 +39,7 @@ res_code = 0
 def update_item():
     global mac, status, statusp, start, end
     label.configure(text='Showing Discovered Devices')
+    root.update_idletasks()
     request_api()
     i = 0
     for item in tree.get_children():
@@ -50,11 +51,11 @@ def update_item():
 
 def show_discovered():
     global mac, status, statusp, progress, start, end
-
     if (len(progress)) > 0:
         for i in range(len(progress)):
             progress[i].destroy()
     label.configure(text='Discovering Device')
+    root.update_idletasks()
     progress = []
     request_api()
     tree.delete(*tree.get_children())
@@ -68,41 +69,49 @@ def show_discovered():
 
 
 def request_api():
-    global mac, res_code, status, statusp, start, end
+    print("requesting API")
+    global mac, res_code, status, statusp, start, end, count
     mac = []
     status = []
     statusp = []
     start = []
     end = []
-    url = "http://10.109.178.6/st3server/v1/devices"
     try:
+        url = "http://10.109.178.6/st3server/v1/devices"
         response = requests.request("GET", url)
         res_code = response.status_code
+        if res_code == 200:
+            json_obj = response.json()
+            for item in json_obj["items"]:
+                mac.append(item["mac"])
+                status.append(item["status"])
+                statusp.append(item["statusPercentage"])
+                if "startTime" in item:
+                    start.append(item["startTime"])
+                else:
+                    start.append(" ")
+                if "endTime" in item:
+                    end.append(item["endTime"])
+                else:
+                    end.append(" ")
+        else:
+            show_discovered()
     except:
         label.configure(text="Connection Error")
+        root.update_idletasks()
+        time.sleep(2)
+        for i in range(5):
+            label.configure(text="Retrying in %i second"%(5-i))
+            root.update_idletasks()
+            time.sleep(1)
         res_code = 0
 
-    if res_code == 200:
-        json_obj = response.json()
-        # print(json_obj)
-        for item in json_obj["items"]:
-            mac.append(item["mac"])
-            status.append(item["status"])
-            statusp.append(item["statusPercentage"])
-            if "startTime" in item:
-                start.append(item["startTime"])
-            else:
-                start.append(" ")
-            if "endTime" in item:
-                end.append(item["endTime"])
-            else:
-                end.append(" ")
-    else:
-        request_api()
+
 
 
 def close_window():
     label.configure(text="Closing Window")
+    root.update_idletasks()
     time.sleep(1)
     root.destroy()
 
@@ -114,12 +123,15 @@ def delete_device():
         try:
             requests.request("DELETE", url)
             label.configure(text="Deleting Selected Device")
+            root.update_idletasks()
             time.sleep(1)
             show_discovered()
         except:
             label.configure(text="Connection Error")
+            root.update_idletasks()
     else:
         label.configure(text="No Device Selected")
+        root.update_idletasks()
 
 
 def device_provisioning():
@@ -129,10 +141,13 @@ def device_provisioning():
         try:
             requests.request("PUT", url)
             label.configure(text="Provisioning Selected Device")
+            root.update_idletasks()
         except:
             label.configure(text="Connection Error")
+            root.update_idletasks()
     else:
         label.configure(text="No Device Selected")
+        root.update_idletasks()
 
 
 def start_locking():
@@ -142,10 +157,13 @@ def start_locking():
         try:
             requests.request("PUT", url)
             label.configure(text="Locking Selected Device")
+            root.update_idletasks()
         except:
             label.configure(text="Connection Error")
+            root.update_idletasks()
     else:
         label.configure(text="No Device Selected")
+        root.update_idletasks()
 
 
 def bar(prog, val):
