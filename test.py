@@ -97,7 +97,7 @@ def request_api():
         else:
             show_discovered()
     except:
-        label.configure(text="Connection Error")
+        label.configure(text="Connection Error                   ")
         root.update_idletasks()
         time.sleep(2)
         for i in range(5):
@@ -110,7 +110,7 @@ def request_api():
 
 
 def close_window():
-    label.configure(text="Closing Window")
+    label.configure(text="Closing Window            ")
     root.update_idletasks()
     time.sleep(1)
     root.destroy()
@@ -127,7 +127,7 @@ def delete_device():
             time.sleep(1)
             show_discovered()
         except:
-            label.configure(text="Connection Error")
+            label.configure(text="Connection Error                   ")
             root.update_idletasks()
     else:
         label.configure(text="No Device Selected")
@@ -143,7 +143,7 @@ def device_provisioning():
             label.configure(text="Provisioning Selected Device")
             root.update_idletasks()
         except:
-            label.configure(text="Connection Error")
+            label.configure(text="Connection Error                   ")
             root.update_idletasks()
     else:
         label.configure(text="No Device Selected")
@@ -159,7 +159,7 @@ def start_locking():
             label.configure(text="Locking Selected Device")
             root.update_idletasks()
         except:
-            label.configure(text="Connection Error")
+            label.configure(text="Connection Error                   ")
             root.update_idletasks()
     else:
         label.configure(text="No Device Selected")
