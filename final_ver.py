@@ -25,6 +25,7 @@ def update_item():
 # Callback function to Discovery button.
 def show_discovered():
     global progress
+
     if (len(progress)) > 0:
         for i in range(len(progress)):
             progress[i].destroy()
@@ -37,9 +38,11 @@ def show_discovered():
         print("Discovering Device")
         yy = 73
         for i in range(len(mac)):
-            progress.append(Progressbar(root, orient=HORIZONTAL, length=250, mode='determinate'))
+            progress.append(
+                Progressbar(root, orient=HORIZONTAL, length=250, mode='determinate'))
             progress[i].place(x=400, y=yy)
-            tree.insert('', 'end', mac[i], text=mac[i], values=(statusp[i], status[i], start[i], end[i]))
+            tree.insert('', 'end', mac[i], text=mac[i], values=(
+                statusp[i], status[i], start[i], end[i]))
             yy = yy + 20
         update_item()
 
@@ -51,7 +54,9 @@ def request_api():
     statusp = []
     start = []
     end = []
+
     url = "http://localhost/st3server/v1/devices"
+
     try:
         response = request("GET", url)
     except exceptions.HTTPError as err:
@@ -124,12 +129,12 @@ def delete_device():
         messagebox.showerror("Error", "Bad URL too many redirects")
     except exceptions.RequestException:
         messagebox.showerror("Error", "Bad Request")
-        return
 
 
 # start the provisioning of device
 def device_provisioning():
     dev_name = tree.focus()
+    # check if device is selected from ui tree view
     if dev_name:
         # confirm from user
         result = messagebox.askyesno(
@@ -142,6 +147,7 @@ def device_provisioning():
     else:
         messagebox.showwarning("Station3", "No item selected from tree")
         return
+
     try:
         response = request("PUT", url)
         http_ret = response.status_code
@@ -159,12 +165,12 @@ def device_provisioning():
         messagebox.showerror("Error", "Bad URL too many redirects")
     except exceptions.RequestException:
         messagebox.showerror("Error", "Bad Request")
-        return
 
 
 # start lockdown of device
 def start_locking():
     dev_name = tree.focus()
+    # check if device is selected from ui tree view
     if dev_name:
         # confirm from user
         result = messagebox.askyesno(
@@ -177,6 +183,7 @@ def start_locking():
     else:
         messagebox.showwarning("Station3", "No item selected from tree")
         return
+
     try:
         response = request("PUT", url)
         http_ret = response.status_code
@@ -194,8 +201,7 @@ def start_locking():
         messagebox.showerror("Error", "Bad URL too many redirects")
     except exceptions.RequestException:
         messagebox.showerror("Error", "Bad Request")
-        return
-
+        
 
 # increase progress of progress-bar
 def bar(prog, val):
@@ -226,10 +232,14 @@ if __name__ == '__main__':
     tree.heading('End', text='End Time')
 
     tree.place(x=150, y=50)
-    Button(root, text='Discover Device', command=show_discovered, width=14).place(x=19, y=50)
-    Button(root, text='Start Provision', command=device_provisioning, width=14).place(x=19, y=111)
-    Button(root, text='Start Locking', command=start_locking, width=14).place(x=19, y=178)
-    Button(root, text='Delete Device', command=delete_device, width=14).place(x=19, y=242)
+    Button(root, text='Discover Device',
+           command=show_discovered, width=14).place(x=19, y=50)
+    Button(root, text='Start Provision',
+           command=device_provisioning, width=14).place(x=19, y=111)
+    Button(root, text='Start Locking',
+           command=start_locking, width=14).place(x=19, y=178)
+    Button(root, text='Delete Device',
+           command=delete_device, width=14).place(x=19, y=242)
     Button(root, text='Exit', command=close_window).place(x=600, y=300)
 
     mainloop()
