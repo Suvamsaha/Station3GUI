@@ -1,41 +1,9 @@
 #!/usr/bin/env python3
-from tkinter import *
-from tkinter.ttk import *
-
-from tkinter import messagebox
+from tkinter import Button, messagebox, Tk, NO, mainloop
+from tkinter.ttk import Treeview
 
 import time
 import requests
-
-root = Tk()
-root.geometry("1220x350")
-root.resizable(0, 0)
-root.title("Station3.v1.web-server")
-
-tree = Treeview(root)
-tree["columns"] = ('Percent', 'Status', 'Start', 'End')
-
-tree.column("#0", width=200, minwidth=150, stretch=NO)
-tree.column("Status", width=100, minwidth=80, stretch=NO)
-tree.column("Percent", width=300, minwidth=80, stretch=NO)
-tree.column("Start", width=220, minwidth=80, stretch=NO)
-tree.column("End", width=220, minwidth=80, stretch=NO)
-
-tree.heading('#0', text='MAC')
-tree.heading('Status', text='Status')
-tree.heading('Percent', text='Percent')
-tree.heading('Start', text='Start Time')
-tree.heading('End', text='End Time')
-
-# tree view variables
-"""
-mac = []
-status = []
-statusp = []
-start = []
-end = []
-progress = []
-"""
 
 
 def update_item():
@@ -56,7 +24,7 @@ def show_discovered():
     if (len(progress)) > 0:
         for i in range(len(progress)):
             progress[i].destroy()
-    #if ret == 1:
+    # if ret == 1:
     #    return
     tree.delete(*tree.get_children())
     print("Discovering Device")
@@ -83,38 +51,40 @@ def request_api():
     url = "http://localhost/st3server/v1/devices"
     try:
         response = requests.request("GET", url)
-        json_obj = response.json()
-        if json_obj["total"] == 0:
-            messagebox.showinfo("station3", "No device found! Please retry")
-            return 1
-        for item in json_obj["items"]:
-            mac.append(item["mac"])
-            status.append(item["status"])
-            statusp.append(item["statusPercentage"])
-            if "startTime" in item:
-                start.append(item["startTime"])
-            else:
-                start.append(" ")
-            if "endTime" in item:
-                end.append(item["endTime"])
-            else:
-                end.append(" ")
-        return mac, status, statusp, start, end, progress
-
     except requests.exceptions.HTTPError as err:
         messagebox.showerror("Error", f"HTTPError : {err}")
+        return
     except requests.exceptions.Timeout:
         messagebox.showerror("Error", "Request TimeOut")
+        return
     except requests.exceptions.TooManyRedirects:
         messagebox.showerror("Error", "Bad URL too many redirects")
+        return
     except requests.exceptions.RequestException:
         messagebox.showerror("Error", "Bad Request")
-        # except:
-        #    messagebox.showinfo("station3", "Connection refused:Exceeds maximum attempt")
         return
+    #except:
+    #    messagebox.showinfo("station3", "Connection refused:Exceeds maximum attempt")
+    #    return
+    json_obj = response.json()
+    if json_obj["total"] == 0:
+        messagebox.showinfo("station3", "No device found! Please retry")
+        return
+    for item in json_obj["items"]:
+        mac.append(item["mac"])
+        status.append(item["status"])
+        statusp.append(item["statusPercentage"])
+        if "startTime" in item:
+            start.append(item["startTime"])
+        else:
+            start.append(" ")
+        if "endTime" in item:
+            end.append(item["endTime"])
+        else:
+            end.append(" ")
+    return mac, status, statusp, start, end, progress
 
-
-# destory the UI
+# destroy the UI
 def close_window():
     root.destroy()
 
@@ -233,12 +203,34 @@ def bar(prog, val):
 
 
 # MAIN UI PLACEMENTS
-tree.place(x=150, y=50)
-# progress.place(x=10, y=300)
-Button(root, text='Discover Device', command=show_discovered, width=14).place(x=19, y=50)
-Button(root, text='Start Provision', command=device_provisioning, width=14).place(x=19, y=111)
-Button(root, text='Start Locking', command=start_locking, width=14).place(x=19, y=178)
-Button(root, text='Delete Device', command=delete_device, width=14).place(x=19, y=242)
-Button(root, text='Exit', command=close_window).place(x=600, y=300)
 
-mainloop()
+
+if __name__ == '__main__':
+    root = Tk()
+    root.geometry("1220x350")
+    root.resizable(0, 0)
+    root.title("Station3.v1.web-server")
+
+    tree = Treeview(root)
+    tree["columns"] = ('Percent', 'Status', 'Start', 'End')
+
+    tree.column("#0", width=200, minwidth=150, stretch=NO)
+    tree.column("Status", width=100, minwidth=80, stretch=NO)
+    tree.column("Percent", width=300, minwidth=80, stretch=NO)
+    tree.column("Start", width=220, minwidth=80, stretch=NO)
+    tree.column("End", width=220, minwidth=80, stretch=NO)
+
+    tree.heading('#0', text='MAC')
+    tree.heading('Status', text='Status')
+    tree.heading('Percent', text='Percent')
+    tree.heading('Start', text='Start Time')
+    tree.heading('End', text='End Time')
+
+    tree.place(x=150, y=50)
+    # progress.place(x=10, y=300)
+    Button(root, text='Discover Device', command=show_discovered, width=14).place(x=19, y=50)
+    Button(root, text='Start Provision', command=device_provisioning, width=14).place(x=19, y=111)
+    Button(root, text='Start Locking', command=start_locking, width=14).place(x=19, y=178)
+    Button(root, text='Delete Device', command=delete_device, width=14).place(x=19, y=242)
+    Button(root, text='Exit', command=close_window).place(x=600, y=300)
+    mainloop()
