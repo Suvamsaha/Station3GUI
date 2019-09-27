@@ -57,7 +57,7 @@ def request_api():
     statusp = []
     start = []
     end = []
-    url = "http://10.109.178.60/st3server/v1/devices"
+    url = "http://localhost/st3server/v1/devices"
     try:
         response = request("GET", url)
     except exceptions.HTTPError as err:
@@ -107,7 +107,7 @@ def delete_device():
         result = messagebox.askyesno(
             "station3", "Are you sure you want to delete device : " + str(dev_name) + "?")
         if str(result) == "True":
-            url = "http://10.109.178.6/st3server/v1/devices/" + str(dev_name)
+            url = "http://localhost/st3server/v1/devices/" + str(dev_name)
         else:
             return
     else:
@@ -142,7 +142,7 @@ def device_provisioning():
         result = messagebox.askyesno(
             "station3", "Are you sure you want to provision device: " + str(dev_name) + "?")
         if str(result) == "True":
-            url = "http://10.109.178.6/st3server/v1/devices/" + \
+            url = "http://localhost/st3server/v1/devices/" + \
                   str(dev_name) + "/provision"
         else:
             return
@@ -177,7 +177,7 @@ def start_locking():
         result = messagebox.askyesno(
             "station3", "Are you sure you want to lockdown device: " + str(dev_name) + "?")
         if str(result) == "True":
-            url = "http://10.109.178.6/st3server/v1/devices/" + \
+            url = "http://localhost/st3server/v1/devices/" + \
                   str(dev_name) + "/startLock"
         else:
             return
