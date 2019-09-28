@@ -1,0 +1,6 @@
+GET http://localhost/st3server/v1/mac3/time
+PUT http://localhost/st3server/v1/mac3/progress import requests
+
+url = "http://localhost/st3server/v1/mac3/progress"
+
+progress=50,16,hex
